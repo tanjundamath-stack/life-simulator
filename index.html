@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+
+<title>人生模拟器</title>
+
+<style>
+
+body{
+    margin:0;
+    padding:20px;
+    font-family:Arial;
+    background:#1e2647;
+    color:white;
+}
+
+h1{
+    text-align:center;
+}
+
+.container{
+    display:flex;
+    gap:20px;
+}
+
+.panel{
+    background:#2d3966;
+    border-radius:20px;
+    padding:20px;
+}
+
+.left{
+    width:350px;
+}
+
+.right{
+    flex:1;
+}
+
+.stat{
+    margin:10px 0;
+}
+
+.bar{
+    height:18px;
+    background:#445487;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.fill{
+    height:100%;
+    background:#6fb3ff;
+}
+
+button{
+    width:140px;
+    height:50px;
+    margin:6px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    font-size:16px;
+}
+
+.log{
+    margin-top:20px;
+    height:220px;
+    overflow:auto;
+    background:#18203d;
+    padding:15px;
+    border-radius:15px;
+}
+
+.achievement{
+    display:inline-block;
+    padding:5px 10px;
+    margin:4px;
+    background:#596fc0;
+    border-radius:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>人生模拟器</h1>
+
+<div class="container">
+
+<div class="panel left">
+
+<h2>角色信息</h2>
+
+<div>姓名：<span id="name"></span></div>
+<div>年龄：<span id="age"></span></div>
+<div>职业：<span id="job"></span></div>
+<div>天赋：<span id="talent"></span></div>
+<div>财富：￥<span id="money"></span></div>
+
+<div class="stat">
+健康
+<div class="bar">
+<div class="fill" id="healthBar"></div>
+</div>
+</div>
+
+<div class="stat">
+智力
+<div class="bar">
+<div class="fill" id="intBar"></div>
+</div>
+</div>
+
+<div class="stat">
+魅力
+<div class="bar">
+<div class="fill" id="charmBar"></div>
+</div>
+</div>
+
+<div class="stat">
+能力
+<div class="bar">
+<div class="fill" id="abilityBar"></div>
+</div>
+</div>
+
+<div class="stat">
+情商
+<div class="bar">
+<div class="fill" id="emotionBar"></div>
+</div>
+</div>
+
+<div class="stat">
+声望
+<div class="bar">
+<div class="fill" id="fameBar"></div>
+</div>
+</div>
+
+<h3>家庭</h3>
+
+<div>恋爱：<span id="love"></span></div>
+<div>婚姻：<span id="married"></span></div>
+<div>孩子：<span id="children"></span></div>
+
+<h3>成就</h3>
+
+<div id="achievements"></div>
+
+</div>
+
+<div class="panel right">
+
+<button onclick="study()">学习</button>
+<button onclick="work()">工作</button>
+
+<button onclick="exercise()">锻炼</button>
+<button onclick="social()">社交</button>
+
+<button onclick="travel()">旅行</button>
+<button onclick="invest()">投资</button>
+
+<button onclick="business()">创业</button>
+<button onclick="loveAction()">恋爱</button>
+
+<button onclick="marry()">结婚</button>
+<button onclick="child()">生孩子</button>
+
+<button onclick="buyHouse()">买房</button>
+<button onclick="buyCar()">买车</button>
+
+<button onclick="nextYear()">下一年</button>
+
+<button onclick="save()">保存</button>
+
+<div class="log" id="log"></div>
+
+</div>
+
+</div>
+
+<script>
+
+const talents=[
+"普通人",
+"超级学霸",
+"商业天才",
+"运动达人",
+"颜值天花板"
+];
+
+let player={
+
+name:"玩家",
+
+age:0,
+
+job:"婴儿",
+
+talent:talents[Math.floor(Math.random()*talents.length)],
+
+money:1000,
+
+health:100,
+
+intelligence:50,
+
+charm:50,
+
+ability:50,
+
+emotion:50,
+
+fame:0,
+
+love:false,
+
+married:false,
+
+children:0,
+
+house:false,
+
+car:false,
+
+achievements:[]
+
+};
+
+if(player.talent==="超级学霸"){
+
+player.intelligence+=30;
+
+}
+
+if(player.talent==="商业天才"){
+
+player.ability+=30;
+
+}
+
+if(player.talent==="运动达人"){
+
+player.health+=20;
+
+}
+
+if(player.talent==="颜值天花板"){
+
+player.charm+=30;
+
+}
+
+function log(msg){
+
+document.getElementById("log").innerHTML=
+
+msg+"<br>"+
+
+document.getElementById("log").innerHTML;
+
+}
+
+function clamp(v){
+
+if(v<0)return 0;
+
+if(v>100)return 100;
+
+return v;
+
+}
+
+function update(){
+
+healthBar.style.width=player.health+"%";
+
+intBar.style.width=player.intelligence+"%";
+
+charmBar.style.width=player.charm+"%";
+
+abilityBar.style.width=player.ability+"%";
+
+emotionBar.style.width=player.emotion+"%";
+
+fameBar.style.width=player.fame+"%";
+
+name.textContent=player.name;
+
+age.textContent=player.age;
+
+job.textContent=player.job;
+
+talent.textContent=player.talent;
+
+money.textContent=player.money;
+
+love.textContent=player.love?"是":"否";
+
+married.textContent=player.married?"是":"否";
+
+children.textContent=player.children;
+
+document.getElementById("achievements").innerHTML=
+
+player.achievements.map(
+
+a=>`<span class="achievement">${a}</span>`
+
+).join("");
+
+}
+
+function study(){
+
+player.intelligence+=5;
+
+player.ability+=2;
+
+log("努力学习");
+
+}
+
+function work(){
+
+if(player.age<18){
+
+log("未成年不能工作");
+
+return;
+
+}
+
+let income=player.ability*100;
+
+player.money+=income;
+
+log("工作获得"+income+"元");
+
+}
+
+function exercise(){
+
+player.health+=5;
+
+player.ability+=2;
+
+log("坚持锻炼");
+
+}
+
+function social(){
+
+player.charm+=5;
+
+player.emotion+=5;
+
+player.money-=300;
+
+log("参加社交活动");
+
+}
+
+function travel(){
+
+player.health+=10;
+
+player.emotion+=10;
+
+player.money-=3000;
+
+log("出去旅行");
+
+}
+
+function invest(){
+
+player.money-=5000;
+
+if(Math.random()>0.5){
+
+let gain=Math.floor(Math.random()*30000);
+
+player.money+=gain;
+
+log("投资成功："+gain);
+
+}else{
+
+log("投资失败");
+
+}
+
+}
+
+function business(){
+
+if(player.money<10000){
+
+log("创业资金不足");
+
+return;
+
+}
+
+if(Math.random()>0.5){
+
+player.money+=50000;
+
+player.fame+=20;
+
+player.job="企业家";
+
+log("创业成功");
+
+}else{
+
+player.money-=10000;
+
+log("创业失败");
+
+}
+
+}
+
+function loveAction(){
+
+if(player.charm+player.emotion>120){
+
+player.love=true;
+
+log("恋爱成功");
+
+}else{
+
+log("被拒绝了");
+
+}
+
+}
+
+function marry(){
+
+if(!player.love){
+
+log("先恋爱");
+
+return;
+
+}
+
+player.married=true;
+
+log("结婚成功");
+
+}
+
+function child(){
+
+if(!player.married){
+
+log("先结婚");
+
+return;
+
+}
+
+player.children++;
+
+log("孩子出生");
+
+}
+
+function buyHouse(){
+
+if(player.money<100000){
+
+log("买不起房");
+
+return;
+
+}
+
+player.money-=100000;
+
+player.house=true;
+
+log("购买房产");
+
+}
+
+function buyCar(){
+
+if(player.money<50000){
+
+log("买不起车");
+
+return;
+
+}
+
+player.money-=50000;
+
+player.car=true;
+
+log("购买汽车");
+
+}
+
+function checkAchievement(){
+
+if(
+
+player.money>=1000000 &&
+
+!player.achievements.includes("百万富翁")
+
+){
+
+player.achievements.push("百万富翁");
+
+}
+
+if(
+
+player.job==="企业家" &&
+
+!player.achievements.includes("企业家")
+
+){
+
+player.achievements.push("企业家");
+
+}
+
+if(
+
+player.age>=90 &&
+
+!player.achievements.includes("长寿人生")
+
+){
+
+player.achievements.push("长寿人生");
+
+}
+
+}
+
+function nextYear(){
+
+player.age++;
+
+if(player.age<6){
+
+player.job="儿童";
+
+}
+
+else if(player.age<18){
+
+player.job="学生";
+
+}
+
+else if(player.job!=="企业家"){
+
+player.job="职场人士";
+
+}
+
+if(Math.random()<0.3){
+
+let events=[
+
+"中彩票",
+
+"生病",
+
+"升职",
+
+"遇到贵人"
+
+];
+
+log(
+
+events[Math.floor(Math.random()*events.length)]
+
+);
+
+}
+
+player.health-=2;
+
+checkAchievement();
+
+if(player.age>=100){
+
+alert("人生结束！");
+
+let ending="普通人生";
+
+if(player.money>=10000000){
+
+ending="世界首富";
+
+}
+
+else if(player.job==="企业家"){
+
+ending="商业巨头";
+
+}
+
+else if(player.intelligence>=90){
+
+ending="科学家";
+
+}
+
+alert("人生结局："+ending);
+
+}
+
+update();
+
+}
+
+function save(){
+
+localStorage.setItem(
+
+"life",
+
+JSON.stringify(player)
+
+);
+
+log("保存成功");
+
+}
+
+let saveData=
+
+localStorage.getItem("life");
+
+if(saveData){
+
+player=JSON.parse(saveData);
+
+}
+
+update();
+
+</script>
+
+</body>
+</html>
